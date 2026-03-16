@@ -3,12 +3,24 @@ import cv2 as cv
 import numpy as np
 from tensorflow.keras.models import load_model
 import os
+import plotly.graph_objects as go
+from translations import TRANSLATIONS
 
 # ---------------------------------------------------
 # PAGE CONFIG
 # ---------------------------------------------------
 st.set_page_config(page_title="Uzhavar Ariviyal AI", layout="wide", page_icon="🪴")
+# Language selector (top right)
+col1, col2 = st.columns([10,1])
 
+with col2:
+    language = st.selectbox(
+        "🌐",
+        ["en","ta"],
+        format_func=lambda x: " ENG" if x=="en" else "தமிழ்"
+    )
+def t(key):
+    return TRANSLATIONS[language].get(key, key)
 # ---------------------------------------------------
 # CUSTOM CSS
 # ---------------------------------------------------
@@ -21,16 +33,16 @@ GLOBAL PAGE BACKGROUND
 .stApp{
 background: linear-gradient(rgba(232,245,233,0.9), rgba(255,255,255,0.9)),
 url('https://www.transparenttextures.com/patterns/leaf.png');
-background-color:#f0f4f0;
+background-color:#4caf50;
 }
 
-
+            
 /* ------------------------------------------------
 NAVBAR
 ------------------------------------------------ */
 
 .navbar{
-background:#1b5e20;
+background:#4caf50;
 padding:15px 40px;
 border-radius:12px;
 display:flex;
@@ -183,7 +195,7 @@ CONFIDENCE RESULT BOX
 background:#e8f5e9;
 padding:10px;
 border-radius:10px;
-font-size:18px;
+font-size:22px;
 margin-top:10px;
 }
 
@@ -353,8 +365,255 @@ TREATMENT_DB = {
     "Tomato - healthy": "Plant is healthy. Continue balanced fertilization and monitoring."
 }
 
+
+
+DISEASE_INFO = {
+
+# ---------------- APPLE ----------------
+"Apple - Apple scab": {
+"description": "Apple scab is a fungal disease that causes dark, scabby spots on leaves and fruits.",
+"cause": "Caused by the fungus Venturia inaequalis, which spreads in cool and wet spring weather."
+},
+
+"Apple - Black rot": {
+"description": "Black rot causes dark circular lesions on leaves and rotting fruits.",
+"cause": "Caused by the fungus Botryosphaeria obtusa which survives on dead wood and infected fruits."
+},
+
+"Apple - Cedar apple rust": {
+"description": "Cedar apple rust produces yellow-orange spots on apple leaves.",
+"cause": "Caused by the fungus Gymnosporangium juniperi-virginianae which requires both cedar and apple trees."
+},
+
+"Apple - healthy": {
+"description": "The apple plant shows no visible signs of disease.",
+"cause": "Healthy plant with proper environmental conditions and care."
+},
+
+# ---------------- BLUEBERRY ----------------
+"Blueberry - healthy": {
+"description": "The blueberry plant appears healthy with no disease symptoms.",
+"cause": "Proper soil acidity, watering, and healthy plant management."
+},
+
+# ---------------- CHERRY ----------------
+"Cherry (including sour) - Powdery mildew": {
+"description": "Powdery mildew causes white powder-like fungal growth on cherry leaves.",
+"cause": "Caused by Podosphaera fungi, common in warm and dry climates with poor airflow."
+},
+
+"Cherry (including sour) - healthy": {
+"description": "The cherry plant is healthy and free from disease symptoms.",
+"cause": "Good plant health maintained through proper pruning and care."
+},
+
+# ---------------- CORN ----------------
+"Corn (maize) - Cercospora leaf spot Gray leaf spot": {
+"description": "Gray leaf spot causes rectangular gray lesions on corn leaves.",
+"cause": "Caused by the fungus Cercospora zeae-maydis, thriving in warm humid environments."
+},
+
+"Corn (maize) - Common rust": {
+"description": "Common rust forms reddish-brown pustules on corn leaves.",
+"cause": "Caused by the fungus Puccinia sorghi and spreads through windborne spores."
+},
+
+"Corn (maize) - Northern Leaf Blight": {
+"description": "Northern leaf blight produces long gray-green lesions on leaves.",
+"cause": "Caused by the fungus Exserohilum turcicum during humid weather."
+},
+
+"Corn (maize) - healthy": {
+"description": "Corn plant is healthy with no signs of infection.",
+"cause": "Good crop management and disease-resistant varieties."
+},
+
+# ---------------- GRAPE ----------------
+"Grape - Black rot": {
+"description": "Black rot causes brown circular spots on grape leaves and shriveled fruits.",
+"cause": "Caused by the fungus Guignardia bidwellii, which thrives in warm humid weather."
+},
+
+"Grape - Esca (Black Measles)": {
+"description": "Esca disease leads to leaf discoloration and black spots on grapes.",
+"cause": "Caused by multiple fungal pathogens infecting the woody tissue."
+},
+
+"Grape - Leaf blight (Isariopsis Leaf Spot)": {
+"description": "Leaf blight causes dark angular spots on grape leaves.",
+"cause": "Caused by the fungus Isariopsis clavispora under humid conditions."
+},
+
+"Grape - healthy": {
+"description": "Grape vine is healthy without visible disease symptoms.",
+"cause": "Proper vineyard management and disease prevention."
+},
+
+# ---------------- ORANGE ----------------
+"Orange - Haunglongbing (Citrus greening)": {
+"description": "Citrus greening causes yellowing leaves and bitter, misshapen fruits.",
+"cause": "Caused by Candidatus Liberibacter bacteria transmitted by citrus psyllid insects."
+},
+
+# ---------------- PEACH ----------------
+"Peach - Bacterial spot": {
+"description": "Bacterial spot causes small dark lesions on peach leaves and fruits.",
+"cause": "Caused by the bacterium Xanthomonas campestris spread through rain splash."
+},
+
+"Peach - healthy": {
+"description": "Peach tree appears healthy with no disease symptoms.",
+"cause": "Healthy orchard management and proper irrigation."
+},
+
+# ---------------- PEPPER ----------------
+"Pepper, bell - Bacterial spot": {
+"description": "Bacterial spot causes dark water-soaked spots on pepper leaves.",
+"cause": "Caused by Xanthomonas bacteria and spreads through water droplets."
+},
+
+"Pepper, bell - healthy": {
+"description": "Pepper plant is healthy without signs of infection.",
+"cause": "Good drainage and crop care."
+},
+
+# ---------------- POTATO ----------------
+"Potato - Early blight": {
+"description": "Early blight causes brown spots with concentric rings on potato leaves.",
+"cause": "Caused by Alternaria solani fungus in warm humid environments."
+},
+
+"Potato - Late blight": {
+"description": "Late blight causes large dark lesions and rapid plant decay.",
+"cause": "Caused by Phytophthora infestans under cool and moist conditions."
+},
+
+"Potato - healthy": {
+"description": "Potato crop is healthy without disease symptoms.",
+"cause": "Proper crop rotation and disease management."
+},
+
+# ---------------- RASPBERRY ----------------
+"Raspberry - healthy": {
+"description": "Raspberry plant shows no visible disease symptoms.",
+"cause": "Healthy growth conditions."
+},
+
+# ---------------- SOYBEAN ----------------
+"Soybean - healthy": {
+"description": "Soybean crop is healthy with normal leaf development.",
+"cause": "Balanced fertilization and proper crop management."
+},
+
+# ---------------- SQUASH ----------------
+"Squash - Powdery mildew": {
+"description": "Powdery mildew forms white powder-like spots on squash leaves.",
+"cause": "Caused by fungal pathogens in warm dry climates."
+},
+
+# ---------------- STRAWBERRY ----------------
+"Strawberry - Leaf scorch": {
+"description": "Leaf scorch causes reddish-purple spots on strawberry leaves.",
+"cause": "Caused by the fungus Diplocarpon earlianum."
+},
+
+"Strawberry - healthy": {
+"description": "Strawberry plant is healthy with no disease symptoms.",
+"cause": "Proper soil drainage and plant care."
+},
+
+# ---------------- TOMATO ----------------
+"Tomato - Bacterial spot": {
+"description": "Bacterial spot causes dark lesions on tomato leaves and fruits.",
+"cause": "Caused by Xanthomonas bacteria spread by water and wind."
+},
+
+"Tomato - Early blight": {
+"description": "Early blight produces concentric brown spots on leaves.",
+"cause": "Caused by the fungus Alternaria solani."
+},
+
+"Tomato - Late blight": {
+"description": "Late blight causes large dark lesions and rapid plant collapse.",
+"cause": "Caused by Phytophthora infestans during cool humid weather."
+},
+
+"Tomato - Leaf Mold": {
+"description": "Leaf mold causes yellow spots on the upper leaf surface.",
+"cause": "Caused by the fungus Passalora fulva under high humidity."
+},
+
+"Tomato - Septoria leaf spot": {
+"description": "Septoria leaf spot causes small circular gray spots on leaves.",
+"cause": "Caused by the fungus Septoria lycopersici."
+},
+
+"Tomato - Spider mites Two-spotted spider mite": {
+"description": "Spider mites cause yellow speckled leaves and webbing.",
+"cause": "Caused by tiny mites feeding on leaf tissue."
+},
+
+"Tomato - Target Spot": {
+"description": "Target spot produces circular lesions with ring patterns.",
+"cause": "Caused by Corynespora cassiicola fungus."
+},
+
+"Tomato - Tomato Yellow Leaf Curl Virus": {
+"description": "This virus causes yellowing and curling of tomato leaves.",
+"cause": "Transmitted by whitefly insects."
+},
+
+"Tomato - Tomato mosaic virus": {
+"description": "Tomato mosaic virus causes mottled light and dark green leaf patterns.",
+"cause": "Spread through infected seeds, tools, and plant contact."
+},
+
+"Tomato - healthy": {
+"description": "Tomato plant is healthy with no disease symptoms.",
+"cause": "Balanced nutrients and proper crop management."
+}
+
+}
+
+CROP_EMOJI = {
+    "Apple": "🍎",
+    "Blueberry": "🫐",
+    "Cherry (including sour)": "🍒",
+    "Corn (maize)": "🌽",
+    "Grape": "🍇",
+    "Orange": "🍊",
+    "Peach": "🍑",
+    "Pepper, bell": "🫑",
+    "Potato": "🥔",
+    "Raspberry": "🍓",
+    "Soybean": "🌱",
+    "Squash": "🎃",
+    "Strawberry": "🍓",
+    "Tomato": "🍅"
+}
+
 def format_label(label):
     return label.replace("___", " - ").replace("_", " ")
+
+
+def confidence_meter(confidence):
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=confidence,
+        title={'text': "AI Confidence Level"},
+        gauge={
+            'axis': {'range': [0, 100]},
+            'bar': {'color': "#2e7d32"},
+            'steps': [
+                {'range': [0, 50], 'color': "#ffcdd2"},
+                {'range': [50, 75], 'color': "#fff9c4"},
+                {'range': [75, 100], 'color': "#c8e6c9"}
+            ],
+        }
+    ))
+
+    fig.update_layout(height=250)
+    return fig
 
 # ---------------------------------------------------
 # SESSION STATE INIT
@@ -382,17 +641,16 @@ def go_to_treatment():
 # ---------------------------------------------------
 if st.session_state.page == 'home':
     # ---------------- NAVBAR ----------------
-    st.markdown("""
+    st.markdown(f"""
     <div class="navbar">
-    <div class="nav-title">Smart Crop Disease Detection</div>
-    <div class="nav-menu">Upload a leaf image and let AI detect plant diseases instantly.</div>
-    </div>
+    <div class="nav-title">{t("navbar_title")}</div>
+    <div class="nav-menu">{t("navbar_desc")}</div></div>
     """, unsafe_allow_html=True)
 
     # ---------------- HERO SECTION ----------------
-    st.markdown("""
+    st.markdown(f"""
     <div class="hero-box">
-    <h1>🌿 Uzhavar Ariviyal AI</h1>
+    <h1>🌿 {t("app_title")}</h1>
     <p>உழுவார் உலகத்தார்க்கு ஆணிஅஃ தாற்றாது எழுவாரை எல்லாம் பொறுத்து.</p>
     </div>
     """, unsafe_allow_html=True)
@@ -403,7 +661,7 @@ if st.session_state.page == 'home':
 
     # ---------- Diagnose ----------
     with col1:
-        st.markdown("""
+        st.markdown(f"""
         <div class="feature-card">
         <div class="feature-icon">📸</div>
         <h3>AI Leaf Diagnosis</h3>
@@ -416,7 +674,7 @@ if st.session_state.page == 'home':
 
     # ---------- Crop Library ----------
     with col2:
-        st.markdown("""
+        st.markdown(f"""
         <div class="feature-card">
         <div class="feature-icon">🌾</div>
         <h3>Crop Library</h3>
@@ -429,7 +687,7 @@ if st.session_state.page == 'home':
 
     # ---------- Treatment ----------
     with col3:
-        st.markdown("""
+        st.markdown(f"""
         <div class="feature-card">
         <div class="feature-icon">🌱</div>
         <h3>Treatment Guide</h3>
@@ -447,13 +705,30 @@ elif st.session_state.page == 'detector':
     st.button("⬅ Back to Home", on_click=go_to_home)
 
     st.markdown(
-        "<h1 style='text-align:center;color:#2e7d32;'>🌿 Crop Disease Diagnosis</h1>",
+        f"""<h1 style='text-align:center;color:#2e7d32;'>🌿 {t('diagnosis_title')}</h1>""",
         unsafe_allow_html=True
     )
 
     # ---------------- UPLOAD SECTION ----------------
-    st.markdown('<div class="upload-card">', unsafe_allow_html=True)
+    st.markdown(f"""
+<div class="result-card">
 
+<h3 style="text-align:center;color:#2e7d32;">AI Leaf Analysis</h3>
+
+<p style="font-size:18px;">
+{t("upload_text")}
+The system will analyze the leaf using a trained deep learning model
+and identify possible plant diseases from the dataset.
+</p>
+
+<p style="font-size:20px;">
+After detection, the system will display:
+<br>✔ Disease Name
+<br>✔ Recommended Treatment
+</p>
+
+</div>
+""", unsafe_allow_html=True)
     uploaded_file = st.file_uploader(
         "Drag and drop a crop leaf image to start diagnosis",
         type=["jpg","jpeg","png"]
@@ -487,22 +762,39 @@ elif st.session_state.page == 'detector':
         # ---------------- RESULT CARD ----------------
         with col2:
             st.markdown('<div class="ai-card">', unsafe_allow_html=True)
-            st.markdown('<div class="card-title">🌿 Diagnosis Result</div>', unsafe_allow_html=True)
-
+            st.markdown(f'<div class="card-title">🌿 {t("disease_result")}</div>', unsafe_allow_html=True)
+ 
+            
             if confidence >= 70:
                 st.success(predicted_label)
-                st.markdown(
-                    f'<div class="confidence-box">Confidence Level: {confidence:.2f}%</div>',
-                    unsafe_allow_html=True
+                # AI Confidence Meter
+                st.plotly_chart(
+                confidence_meter(confidence),
+                use_container_width=True
                 )
+                
 
                 treatment = TREATMENT_DB.get(
                     predicted_label,
                     "General Advice: Remove infected leaves, ensure sunlight and avoid overwatering."
                 )
 
-                st.markdown("### 🌱 Recommended Treatment")
-                st.write(treatment)
+                st.markdown("### 🌱 " + t("recommended_treatment"))
+                st.markdown(
+    f"""
+    <div style="
+        font-size:20px;
+        background:#e8f5e9;
+        padding:15px;
+        border-radius:10px;
+        color:#1b5e20;
+        font-weight:500;
+    ">
+    {treatment}
+    </div>
+    """,
+    unsafe_allow_html=True
+)
             else:
                 st.warning("Low confidence. Please upload a clearer leaf image.")
 
@@ -513,33 +805,173 @@ elif st.session_state.page == 'detector':
 # ---------------------------------------------------
 elif st.session_state.page == 'supported':
     st.button("⬅ Back to Home", on_click=go_to_home)
-    st.title("🌿 Supported Crops & Diseases")
 
-    st.markdown("### Our AI model recognizes the following conditions:")
+    st.markdown(
+f"<h1 style='text-align:center;color:#2e7d32;'>🌿 {t('supported_title')}</h1>",
+unsafe_allow_html=True
+)
+    st.markdown("### 📊 Crop Disease Distribution")
 
+    crop_counts = {}
     for label in RAW_LABELS:
-        st.markdown(f"- {format_label(label)}")
+        formatted = format_label(label)
+        crop = formatted.split(" - ")[0]
+
+        if crop not in crop_counts:
+            crop_counts[crop] = 0
+
+        crop_counts[crop] += 1
+
+    # Show bar chart once after loop
+    st.bar_chart(crop_counts)
+
+    # ---------------- SEARCH FILTER ----------------
+    search = st.text_input("### 🔎 Search crop or disease")
+
+    if search:
+        filtered_labels = [
+            label for label in RAW_LABELS
+            if search.lower() in format_label(label).lower()
+        ]
+    else:
+        filtered_labels = RAW_LABELS
+
+    # Group diseases by crop
+    crop_dict = {}
+    for label in filtered_labels:
+        formatted = format_label(label)
+        crop = formatted.split(" - ")[0]
+        disease = formatted.split(" - ")[1]
+
+        if crop not in crop_dict:
+            crop_dict[crop] = []
+
+        crop_dict[crop].append(disease)
+
+    cols = st.columns(3)
+
+    i = 0
+    for crop, diseases in crop_dict.items():
+        with cols[i % 3]:
+            emoji = CROP_EMOJI.get(crop, "🌿")
+
+            st.markdown(f"""
+            <div class="ai-card">
+            <div class="card-title">{emoji} {crop}</div>
+            """, unsafe_allow_html=True)
+
+            for d in diseases:
+                st.markdown(f"• {d}")
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        i += 1
 
 # ---------------------------------------------------
 # TREATMENT PAGE
 # ---------------------------------------------------
-elif st.session_state.page == 'treatment':
-    st.button("⬅ Back to Home", on_click=go_to_home)
-    st.title("🌿 Treatment Suggestions")
 
-    st.markdown("Select a disease to view recommended treatment:")
+elif st.session_state.page == 'treatment':
+
+    st.button("⬅ Back to Home", on_click=go_to_home)
+
+    st.markdown(
+        f"<h1 style='text-align:center;color:#2e7d32;'>🌿 {t('treatment_title')}</h1>",
+        unsafe_allow_html=True
+    )
+
+    st.markdown("### 🔎 Search or select a disease")
+
+    # ---------- SEARCH BAR ----------
+    search = st.text_input(t("search_disease"))
 
     formatted_labels = [format_label(label) for label in RAW_LABELS]
-    selected_disease = st.selectbox("Choose Disease", formatted_labels)
+
+    filtered = [
+        label for label in formatted_labels
+        if search.lower() in label.lower()
+    ]
+
+    disease_list = filtered if search else formatted_labels
+
+    # ---------- DROPDOWN ----------
+    selected_disease = st.selectbox(t("choose_disease"), disease_list)
 
     if selected_disease:
         treatment = TREATMENT_DB.get(
             selected_disease,
-            "General Advice: Remove infected leaves, ensure proper sunlight, avoid overwatering, and consult local agricultural officer."
+            "General Advice: Remove infected leaves, ensure sunlight, avoid overwatering and consult an agriculture officer."
         )
 
-        st.success(f"Recommended Treatment for {selected_disease}")
-        st.write(treatment)
+        info = DISEASE_INFO.get(selected_disease)
+
+        if info:
+            st.markdown("### 🧬 Disease Description")
+            st.markdown(
+                f"""
+                <div style="
+                background:#fff3e0;
+                padding:18px;
+                border-radius:10px;
+                font-size:17px;
+                border-left:6px solid #fb8c00;
+                ">
+                {info['description']}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            st.markdown("### 🦠 Cause of Disease")
+            st.markdown(
+                f"""
+                <div style="
+                background:#ffebee;
+                padding:18px;
+                border-radius:10px;
+                font-size:17px;
+                border-left:6px solid #e53935;
+                ">
+                {info['cause']}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            # ---------- HEALTH STATUS ----------
+            if "healthy" in selected_disease.lower():
+                st.success(t("healthy_status"))
+            else:
+                st.warning(t("disease_detected"))
+
+            st.markdown(f"### {selected_disease}")
+
+            # ---------- TREATMENT CARD ----------
+            st.markdown(
+                f"""
+                <div style="
+                    background:#e8f5e9;
+                    padding:20px;
+                    border-radius:12px;
+                    font-size:18px;
+                    color:#1b5e20;
+                    border-left:6px solid #2e7d32;
+                ">
+                🌱 {treatment}
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+            # ---------- PREVENTION TIPS ----------
+            st.markdown(f"### 🛡️ {t('prevention_tips')}")
+            st.markdown("""
+            • Maintain proper crop spacing  
+            • Avoid excessive leaf wetness  
+            • Remove infected leaves early  
+            • Use disease-resistant crop varieties  
+            """)
+
 
 # ---------------------------------------------------
 # FOOTER
