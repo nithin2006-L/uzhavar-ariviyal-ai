@@ -17,20 +17,28 @@ The application uses a trained convolutional neural network model to analyze lea
 # 🚀 Features
 
 🌱 AI-powered crop disease detection
+
 📷 Upload leaf images for instant diagnosis
+
 🧠 Deep learning model trained using TensorFlow
+
 💊 Treatment suggestions for detected diseases
+
 🌿 Supports multiple crops and plant diseases
+
 💻 Simple and interactive web interface
+
 ⚡ Fast predictions using optimized image preprocessing
+
 ---
+
 ## 🌐 Language
 
 This application supports multilingual user interface.
 
 Supported languages:
-- 🇬🇧 English
-- 🇮🇳 Tamil
+-  English
+-  Tamil
   
 Language can be switched from the dropdown available in the application UI.
 
